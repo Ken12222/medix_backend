@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\DoctorRequest;
 use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class DoctorController extends Controller
 {
@@ -16,7 +18,11 @@ class DoctorController extends Controller
     public function index()
     {
         return DoctorResource::collection(
-            Doctor::with("user")->paginate()
+            Doctor::with("user")
+            ->whereHas("user", function($query){
+                $query->where("role", "doctor");
+            })
+            ->paginate()
         );
     }
 
@@ -25,8 +31,16 @@ class DoctorController extends Controller
      */
     public function store(Doctor $doctor, DoctorRequest $request)
     {
+        Gate::authorize("create", $doctor);
         $doctorDetails = $request->validated();
-        $doctorDetails["user_id"] = 1;
+        $doctorDetails["user_id"] = request()->user()->id;
+
+        if(User::where("user_id", $doctorDetails["user_id"])){
+            return response()->json([
+                "message"=>"Details already provided. Try updating instead",
+                "status"=>"failed"
+            ], 500);
+        }
 
         $newDoctor = $doctor::create($doctorDetails);
 
@@ -48,7 +62,16 @@ class DoctorController extends Controller
      */
     public function update(DoctorRequest $request, Doctor $doctor)
     {
+        Gate::authorize("update", $doctor);
+
         $updateDetails = $request->validated();
+        
+        if(!$doctor){
+            return response()->json([
+                "message"=>"details not found. please consider adding your details instead",
+                "status"=>"failed"
+            ]);
+        }
 
         $updateDoctor = $doctor->update($updateDetails);
         if($updateDoctor){
@@ -68,6 +91,7 @@ class DoctorController extends Controller
      */
     public function destroy(Doctor $doctor)
     {
+        Gate::authorize("destroy", $doctor);
         $doctor->delete();
 
         if($doctor){
