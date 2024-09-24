@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PatientRequest;
+use App\Http\Resources\PatientResource;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Doctor;
@@ -15,19 +16,25 @@ class PatientController extends Controller
      */
     public function index(Doctor $doctor)
     {
-        return $doctor->patient->all();
+        return PatientResource::collection(
+            $doctor->patient()->with("user")
+            ->whereHas("user", function($query){
+                $query->where("role", "patient");
+            })
+            ->paginate()
+        );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PatientRequest $request)
+    public function store(PatientRequest $request, Doctor $doctor)
     {
         $reportData = $request->validated();
-        $reportData["user_id"] = 2;
-        $reportData["patient_id"] =1;
+        $reportData["doctor_id"] = 1;
+        $reportData["patient_id"] =2;
 
-        $patientReport = Patient::create($reportData);
+        $patientReport = $doctor->patient()->create($reportData);
 
         if($patientReport){
             return response()->json([
@@ -46,18 +53,18 @@ class PatientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Patient $patient)
+    public function show(Doctor $doctor, string $id)
     {
-        return $patient;
+        return $doctor->patient->where("id", $id)->first();
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(PatientRequest $request, Patient $patient)
+    public function update(PatientRequest $request, Doctor $doctor, string $id)
     {
         $updateData = $request->validated();
-        $updatedReport = $patient->update($updateData);
+        $updatedReport = $doctor->patient()->update($updateData);
 
         if($updatedReport){
             return response()->json([
@@ -65,11 +72,13 @@ class PatientController extends Controller
                 "message"=>"Update successful",
                 "status"=>"success"
             ], 200);
+            exit;
         }else{
             return response()->json([
                 "message"=>"failed to update",
                 "status"=>"failed"
             ], 500);
+            exit;
         }
 
     }
@@ -77,8 +86,20 @@ class PatientController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Patient $paitent)
+    public function destroy(Doctor $doctor, string $id)
     {
-        $paitent->delete();
+        $delPatient = $doctor->patient()->where("id", $id)->delete();
+        if($delPatient){
+            return response()->json([
+                "message"=>"You have successfully deleted Patient",
+                "status"=>"success"
+            ], 200);
+        }else{
+            return response()->json([
+                "message"=>"failed to delete. Please try again later",
+                "status"=>"failed"
+            ], 500);
+        }
+
     }
 }

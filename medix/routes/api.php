@@ -26,7 +26,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 //Patient
-Route::get("patient", [PatientController::class, "index"]);
-Route::get("patient/{patient}", [PatientController::class, "show"]);
-Route::put("patient/{patient}", [PatientController::class, "update"]);
-Route::post("patient", [PatientController::class, "store"]);
+Route::get("doctor/{doctor}/patient", [PatientController::class, "index"])->scopeBindings();
+Route::get("doctor/{doctor}/patient/{patient}", [PatientController::class, "show"])->scopeBindings();
+Route::put("doctor/{doctor}/patient/{patient}", [PatientController::class, "update"]);
+Route::post("doctor/{doctor}/patient", [PatientController::class, "store"]);
+Route::delete("doctor/{doctor}/patient/{patient}", [PatientController::class, "destroy"]);

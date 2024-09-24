@@ -35,11 +35,14 @@ class DoctorController extends Controller
         $doctorDetails = $request->validated();
         $doctorDetails["user_id"] = request()->user()->id;
 
-        if(User::where("user_id", $doctorDetails["user_id"])){
+        $doctorExist = $doctor->where("user_id", $doctorDetails["user_id"])->first();
+
+        if($doctorExist){
             return response()->json([
                 "message"=>"Details already provided. Try updating instead",
                 "status"=>"failed"
             ], 500);
+           exit();
         }
 
         $newDoctor = $doctor::create($doctorDetails);
