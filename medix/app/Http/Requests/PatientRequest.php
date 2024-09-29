@@ -22,8 +22,8 @@ class PatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "symptoms"=>"string|required|min:5",
-            "doc_report"=>"required|string|min:5"
+            "user_id"=>"required|integer",
+            "doctor_id"=>"integer"
         ];
     }
 }

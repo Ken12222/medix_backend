@@ -19,10 +19,6 @@ class Doctor extends Model
         return $this->hasMany(Patient::class);
     }
 
-    public function doctor_patient(){
-        return $this->hasMany(Doctor_patient::class);
-    }
-
     public function PatientReport(){
         return $this->hasMany(PatientReport::class);
     }

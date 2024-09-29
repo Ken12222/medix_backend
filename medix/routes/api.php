@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\PatientReportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,8 +27,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 //Patient
-Route::get("doctor/{doctor}/patient", [PatientController::class, "index"])->scopeBindings();
-Route::get("doctor/{doctor}/patient/{patient}", [PatientController::class, "show"])->scopeBindings();
-Route::put("doctor/{doctor}/patient/{patient}", [PatientController::class, "update"]);
-Route::post("doctor/{doctor}/patient", [PatientController::class, "store"]);
-Route::delete("doctor/{doctor}/patient/{patient}", [PatientController::class, "destroy"]);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get("doctor/{doctor}/patient", [PatientController::class, "index"])->scopeBindings();
+    Route::get("doctor/{doctor}/patient/{patient}", [PatientController::class, "show"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient", [PatientController::class, "store"])->scopeBindings();
+    Route::delete("doctor/{doctor}/patient/{patient}", [PatientController::class, "destroy"])->scopeBindings() ;
+});
+
+
+
+
+
+//Patient Report
+//Route::get("patient_report", [PatientReportController::class, "show"]);

@@ -9,6 +9,8 @@ class PatientReport extends Model
 {
     use HasFactory;
 
+    protected $fillable = ["symptoms", "doc_report"];
+
     public function Doctor(){
         return $this->belongsTo(Doctor::class);
     }

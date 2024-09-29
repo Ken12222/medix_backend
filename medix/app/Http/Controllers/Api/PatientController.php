@@ -8,38 +8,58 @@ use App\Http\Resources\PatientResource;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Doctor;
+use Illuminate\Support\Facades\Gate;
 
 class PatientController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Doctor $doctor)
+    public function index(Doctor $doctor, Patient $patient)
     {
-        return PatientResource::collection(
-            $doctor->patient()->with("user")
-            ->whereHas("user", function($query){
-                $query->where("role", "patient");
-            })
-            ->paginate()
-        );
+        Gate::authorize("viewAny", $patient);
+        
+        if(request()->user()->id === $doctor->user_id){
+            return PatientResource::collection(
+                $patient->where("doctor_id", $doctor->user_id)
+                ->with("user")
+                ->whereHas("user", function($query){
+                    $query->where("role", "patient");
+                })
+                ->paginate()
+            );
+
+        }else{
+            return response()->json([
+                'message'=>'No Patients on your profile',
+                "status"=>"failed"
+            ], 500);
+            exit;
+        }
+
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PatientRequest $request, Doctor $doctor)
+    public function store(PatientRequest $request, Patient $patient)
     {
-        $reportData = $request->validated();
-        $reportData["doctor_id"] = 1;
-        $reportData["patient_id"] =2;
+        Gate::authorize("create", $patient);
+        $patientDetails = $request->validated();
+        $patientDetails["doctor_id"] = request()->user()->id;
 
-        $patientReport = $doctor->patient()->create($reportData);
-
-        if($patientReport){
+        if(Patient::where("user_id", $patientDetails)->first()){
             return response()->json([
-                "Report"=>$patientReport,
-                "message"=>"Report has been submitted successfully",
+                "message"=>"user already added to your profile",
+                "status"=>"failed"
+            ]);
+        }
+
+        $patient = patient::create($patientDetails);
+
+        if($patient){
+            return response()->json([
+                "message"=>"Patient Added successfully",
                 "status"=>"success"
             ], 200);
         }else{
@@ -55,32 +75,37 @@ class PatientController extends Controller
      */
     public function show(Doctor $doctor, string $id)
     {
-        return $doctor->patient->where("id", $id)->first();
+        //get patient data from db
+        $patient = Patient::where("id", $id)->first();
+    
+        Gate::authorize("view", $patient);
+
+        if(!$patient){
+            return response()->json([
+                "message"=>"Patient no found please try adding them again",
+                "status"=>"failed"
+            ]);
+        }else if(request()->user()->id !== $patient->doctor_id){
+            return response()->json([
+                "message"=>"Patient is not in your profile",
+                "status"=>"failed"
+            ]);
+        }
+
+        return new PatientResource(
+            Patient::with(["patientReport", "user"])
+            ->where("doctor_id", $doctor->user_id)
+            ->where("user_id", $patient->user_id)
+            ->first()
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(PatientRequest $request, Doctor $doctor, string $id)
+    public function update(PatientRequest $request)
     {
         $updateData = $request->validated();
-        $updatedReport = $doctor->patient()->update($updateData);
-
-        if($updatedReport){
-            return response()->json([
-                "update Details"=> $updatedReport,
-                "message"=>"Update successful",
-                "status"=>"success"
-            ], 200);
-            exit;
-        }else{
-            return response()->json([
-                "message"=>"failed to update",
-                "status"=>"failed"
-            ], 500);
-            exit;
-        }
-
     }
 
     /**
@@ -88,8 +113,13 @@ class PatientController extends Controller
      */
     public function destroy(Doctor $doctor, string $id)
     {
-        $delPatient = $doctor->patient()->where("id", $id)->delete();
+        $patient = Patient::where("id", $id)->first();
+
+        Gate::authorize("delete", $patient);
+
+        $delPatient = $patient->delete();
         if($delPatient){
+
             return response()->json([
                 "message"=>"You have successfully deleted Patient",
                 "status"=>"success"
