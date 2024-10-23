@@ -38,9 +38,9 @@ class EmailVerificationNotification extends Notification
     {
         return (new MailMessage)
                     ->subject("Email Verification")
-                    ->line('Dear'. $notifiable, )
-                    ->line('Please click Verify to verify your email. Ignore this message if you did not register to our platform')
-                    ->action('Verify Email', url($this->url))
+                    ->line('Dear '. $notifiable->name)
+                    ->line('Please verify your email. Ignore this message if you did not register to our platform')
+                    ->action('Verify Email', $this->url)
                     ->line('Thank you for using our application!');
     }
 

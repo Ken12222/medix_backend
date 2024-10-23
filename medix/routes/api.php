@@ -15,6 +15,8 @@ Route::get('/user', function (Request $request) {
 Route::post("register", [AuthController::class, "register"]);
 Route::post("login", [AuthController::class, "login"]);
 Route::post("logout", [AuthController::class, "logout"])->middleware(["auth:sanctum"]);
+Route::post("resend_verify_link", [AuthController::class, "resendVerifyLink"])->middleware(["auth:sanctum"]);
+Route::post("verify_email", [AuthController::class, "verifyEmail"]);
 
 //Doctor routes
 Route::get("doctor", [DoctorController::class, "index"]);
@@ -34,7 +36,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete("doctor/{doctor}/patient/{patient}", [PatientController::class, "destroy"])->scopeBindings() ;
 });
 
-
+//Patient Report
+Route::middleware(["auth:sanctum"])->group(function(){
+    Route::get("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "index"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "index"])->scopeBindings();
+});
 
 
 

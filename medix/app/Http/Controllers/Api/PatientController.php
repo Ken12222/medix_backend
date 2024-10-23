@@ -15,28 +15,23 @@ class PatientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Doctor $doctor, Patient $patient)
-    {
-        Gate::authorize("viewAny", $patient);
-        
-        if(request()->user()->id === $doctor->user_id){
+    public function index($doctorID)
+    {   
+        $authDoctor = Doctor::where("id", $doctorID)->first();
+        if(request()->user()->id == $authDoctor->user_id){
             return PatientResource::collection(
-                $patient->where("doctor_id", $doctor->user_id)
-                ->with("user")
-                ->whereHas("user", function($query){
-                    $query->where("role", "patient");
-                })
+                Patient::where("doctor_id", request()->user()->id)->with("user")
                 ->paginate()
             );
 
         }else{
             return response()->json([
-                'message'=>'No Patients on your profile',
+                "message"=>"no patients on your profile",
                 "status"=>"failed"
-            ], 500);
-            exit;
-        }
+            ], 403);
 
+        }
+        
     }
 
     /**
@@ -48,7 +43,16 @@ class PatientController extends Controller
         $patientDetails = $request->validated();
         $patientDetails["doctor_id"] = request()->user()->id;
 
-        if(Patient::where("user_id", $patientDetails)->first()){
+        $authUser = Doctor::where("id", $patientDetails["doctor_id"])->first();
+        if(!$authUser){
+            return response()->json([
+                "message"=>"complete your profile to access this page",
+                "status"=>"failed"
+            ], 403);
+        }
+        $checkPatientExists = Patient::where("doctor_id", $authUser->user_id)
+        ->where("user_id", $patientDetails["user_id"])->first();
+        if($checkPatientExists){
             return response()->json([
                 "message"=>"user already added to your profile",
                 "status"=>"failed"
@@ -73,16 +77,18 @@ class PatientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Doctor $doctor, string $id)
+    public function show($doctorID, string $id)
     {
         //get patient data from db
-        $patient = Patient::where("id", $id)->first();
-    
+        $patient = Patient::where("id", $id)
+        ->where("doctor_id", $doctorID)
+        ->first();
+
         Gate::authorize("view", $patient);
 
-        if(!$patient){
+        if(empty($patient->user_id)){
             return response()->json([
-                "message"=>"Patient no found please try adding them again",
+                "message"=>"Patient not found please try adding them again",
                 "status"=>"failed"
             ]);
         }else if(request()->user()->id !== $patient->doctor_id){
@@ -90,14 +96,16 @@ class PatientController extends Controller
                 "message"=>"Patient is not in your profile",
                 "status"=>"failed"
             ]);
-        }
+        }else{
 
         return new PatientResource(
-            Patient::with(["patientReport", "user"])
-            ->where("doctor_id", $doctor->user_id)
+            $patient->with(["patientReport", "user"])
+            ->where("doctor_id", request()->user()->id)
             ->where("user_id", $patient->user_id)
             ->first()
         );
+
+        }
     }
 
     /**

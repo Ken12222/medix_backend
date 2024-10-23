@@ -45,6 +45,6 @@ class PatientPolicy
      */
     public function delete(User $user, Patient $patient): bool
     {
-        return $user->id === $patient->doctor_id;
+        return $user->id === $patient->doctor_id || $user->id === $patient->user_id;
     }
 }

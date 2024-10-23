@@ -10,5 +10,5 @@ class EmailVerificationToken extends Model
 {
     use HasFactory, Notifiable;
 
-     protected $guarded = [];
+     protected $fillable = ["email", "token", "expired_at"];
 }
