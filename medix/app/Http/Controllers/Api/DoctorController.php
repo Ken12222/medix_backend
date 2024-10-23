@@ -9,9 +9,14 @@ use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+use App\Custom\Services\DoctorSetupServices;
 
 class DoctorController extends Controller
 {
+
+    public function __construct(private DoctorSetupServices $service){
+
+    }
     /**
      * Display a listing of the resource.
      */
@@ -29,13 +34,14 @@ class DoctorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Doctor $doctor, DoctorRequest $request)
+    public function store(DoctorRequest $request)
     {
-        Gate::authorize("create", $doctor);
+        Gate::authorize("create", Doctor::class);
+
         $doctorDetails = $request->validated();
         $doctorDetails["user_id"] = request()->user()->id;
 
-        $doctorExist = $doctor->where("user_id", $doctorDetails["user_id"])->first();
+        $doctorExist = Doctor::where("user_id", $doctorDetails["user_id"])->first();
 
         if($doctorExist){
             return response()->json([
@@ -45,9 +51,11 @@ class DoctorController extends Controller
            exit();
         }
 
-        $newDoctor = $doctor::create($doctorDetails);
+        $newDoctor = Doctor::create($doctorDetails);
 
-        return $newDoctor;
+        $verifyDoctor = $this->service->kycComplete($newDoctor->id);
+        return $verifyDoctor;
+        
     }
 
     /**
