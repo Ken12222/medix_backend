@@ -99,7 +99,7 @@ class PatientController extends Controller
         }else{
 
         return new PatientResource(
-            $patient->with(["patientReport", "user"])
+            $patient->with(["PatientReport", "user"])
             ->where("doctor_id", request()->user()->id)
             ->where("user_id", $patient->user_id)
             ->first()

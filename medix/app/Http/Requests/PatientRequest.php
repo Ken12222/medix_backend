@@ -23,7 +23,7 @@ class PatientRequest extends FormRequest
     {
         return [
             "user_id"=>"required|integer",
-            "doctor_id"=>"integer"
+            "doctor_id"=>"required|integer"
         ];
     }
 }

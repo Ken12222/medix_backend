@@ -23,7 +23,7 @@ class PatientReportRequest extends FormRequest
     {
         return [
             "symptoms"=>"required|string|max:225",
-            "doc_report"=>"required|string|max:225",
+            "doc_report"=>"required|string|max:225"
         ];
     }
 }

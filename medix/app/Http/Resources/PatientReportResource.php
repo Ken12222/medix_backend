@@ -15,6 +15,8 @@ class PatientReportResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            "patient_id"=>$this->patient_id,
+            "doctor_id"=>$this->doctor_id,
             "symptoms"=>$this->symptoms,
             "doc_report"=>$this->doc_report
         ];

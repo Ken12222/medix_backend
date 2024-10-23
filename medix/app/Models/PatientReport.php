@@ -9,7 +9,7 @@ class PatientReport extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["symptoms", "doc_report"];
+    protected $fillable = ["patient_id", "doctor_id","symptoms", "doc_report"];
 
     public function Doctor(){
         return $this->belongsTo(Doctor::class);

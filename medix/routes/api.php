@@ -39,7 +39,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //Patient Report
 Route::middleware(["auth:sanctum"])->group(function(){
     Route::get("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "index"])->scopeBindings();
-    Route::post("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "index"])->scopeBindings();
+    Route::get("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "show"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "update"])->scopeBindings();
+    Route::delete("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "destroy"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "store"])->scopeBindings();
 });
 
 
