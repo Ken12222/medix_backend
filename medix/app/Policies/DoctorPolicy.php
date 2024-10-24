@@ -48,10 +48,6 @@ class DoctorPolicy
      */
     public function delete(User $user, Doctor $doctor): bool
     {
-        if($user->id === $doctor->user_id){
-            return true;
-        }else{
-            return false;
-        }
+        return $user->id === $doctor->user_id;
     }
 }

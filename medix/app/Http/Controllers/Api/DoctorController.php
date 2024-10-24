@@ -9,12 +9,12 @@ use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
-use App\Custom\Services\DoctorSetupServices;
+use App\Custom\Services\AccountVerificationServices;
 
 class DoctorController extends Controller
 {
 
-    public function __construct(private DoctorSetupServices $service){
+    public function __construct(private AccountVerificationServices $service){
 
     }
     /**
@@ -24,7 +24,7 @@ class DoctorController extends Controller
     {
         return DoctorResource::collection(
             Doctor::with("user")
-            ->whereHas("user", function($query){
+                ->whereHas("user", function($query){
                 $query->where("role", "doctor");
             })
             ->paginate()
@@ -47,14 +47,21 @@ class DoctorController extends Controller
             return response()->json([
                 "message"=>"Details already provided. Try updating instead",
                 "status"=>"failed"
-            ], 500);
+            ], 422);
            exit();
         }
-
+        if(request()->user()->role === "doctor"){
         $newDoctor = Doctor::create($doctorDetails);
 
         $verifyDoctor = $this->service->kycComplete($newDoctor->id);
         return $verifyDoctor;
+        }else{
+            return response()->json([
+                "message"=>"You are not allowed to take this action",
+                "status"=>"failed"
+            ], 422);
+           exit();
+        }
         
     }
 
@@ -63,6 +70,7 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
+        Gate::authorize("view", $doctor);
         return new DoctorResource (
             $doctor::with("user")->first()
         );
@@ -84,15 +92,22 @@ class DoctorController extends Controller
             ]);
         }
 
-        $updateDoctor = $doctor->update($updateDetails);
-        if($updateDoctor){
-            return response()->json([
-                "message"=>"You have updated your data successfully",
-                "status"=>"success"
-            ]);
+        if(request()->user()->role === "doctor"){
+
+            $updateDoctor = $doctor->update($updateDetails);
+            if($updateDoctor){
+                return response()->json([
+                    "message"=>"You have updated your data successfully",
+                    "status"=>"success"
+                ]);
+            }else{
+                return response()->json([
+                    "message"=>"Something went wrong update failed"
+                ]);
+            }
         }else{
             return response()->json([
-                "error"=>"Something went wrong update failed"
+                "message"=>"You are not allowed to update this"
             ]);
         }
     }
@@ -102,19 +117,31 @@ class DoctorController extends Controller
      */
     public function destroy(Doctor $doctor)
     {
-        Gate::authorize("destroy", $doctor);
-        $doctor->delete();
+        Gate::authorize("delete", $doctor); 
 
-        if($doctor){
-            return response()->json([
-                "message"=>"Data have been successfully deleted",
-                "status"=>"success"
-            ]);
+        if(request()->user()->role === "doctor"){
+
+            $user = request()->user();
+            $doctor->delete();
+            $user->KYC = null;
+            $user->save();
+            if(!$doctor){
+                return response()->json([
+                    "message"=>"failed to delete Profile data",
+                    "status"=>"failed"
+                ], 422); 
+            }else{
+                return response()->json([
+                    "message"=>"Profile data deleted successfully",
+                    "status"=>"success"
+                ], 200);
+                
+            }
         }else{
             return response()->json([
-                "errpr"=>"Failed to update. Please try again later",
+                "message"=>"You are not allowed update this data",
                 "status"=>"failed"
-            ]);
+            ], 422);
         }
     }
 }

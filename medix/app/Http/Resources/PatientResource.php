@@ -15,8 +15,11 @@ class PatientResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "patient_id"=>$this->user_id,
-            "doctor_id"=>$this->doctor_id,
+            "contact"=>$this->contact,
+            "insurance_card"=>$this->insurance_card,
+            "insurance_card_id"=>$this->insurance_card_id,
+            "current_medication"=>$this->current_medication,
+            "emergency_contact"=>$this->emergency_contact,
             "Patient_Details"=>new UserResource($this->whenLoaded("user")),
             "Patient_Report"=>PatientReportResource::collection($this->whenLoaded("PatientReport"))
         ];

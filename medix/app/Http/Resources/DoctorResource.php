@@ -18,6 +18,7 @@ class DoctorResource extends JsonResource
         return [
             "phone"=>$this->phone,
             "specialty"=>$this->specialty,
+            "med_licence_no"=>$this->med_licence_number,
             "details"=>new UserResource($this->whenLoaded("user"))
         ];
     }

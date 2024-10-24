@@ -23,7 +23,8 @@ class DoctorRequest extends FormRequest
     {
         return [
             "phone"=>"required|string",
-            "specialty"=>"required|string|min:5"
+            "specialty"=>"required|string|max:255",
+            "med_licence_number"=>"required|string|max:255"
         ];
     }
 }

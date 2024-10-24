@@ -21,7 +21,7 @@ class PatientPolicy
      */
     public function view(User $user, Patient $patient): bool
     {
-        return $user->id === $patient->doctor_id;
+        return $user->id === $patient->user_id;
     }
 
     /**
@@ -35,16 +35,16 @@ class PatientPolicy
     /**
      * Determine whether the user can update the model.
      */
-    //public function update(User $user, Patient $patient): bool
-    //{
-        //
-    //}
+    public function update(User $user, Patient $patient): bool
+    {
+        return $user->id === $patient->user_id;
+    }
 
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Patient $patient): bool
     {
-        return $user->id === $patient->doctor_id || $user->id === $patient->user_id;
+        return $user->id === $patient->user_id;
     }
 }
