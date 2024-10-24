@@ -28,7 +28,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete("doctor/{doctor}", [DoctorController::class, "destroy"]);
 });
 
-//Patient
+//My Patient
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get("doctor/{doctor}/patient", [PatientController::class, "index"])->scopeBindings();
     Route::get("doctor/{doctor}/patient/{patient}", [PatientController::class, "show"])->scopeBindings();
@@ -46,6 +46,12 @@ Route::middleware(["auth:sanctum"])->group(function(){
 });
 
 
-
-//Patient Report
-//Route::get("patient_report", [PatientReportController::class, "show"]);
+//My Doctor
+Route::get("patient", [DoctorController::class, "index"]);
+Route::get("patient/{patient}", [DoctorController::class, "show"]);
+//authenticated doctor routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post("patient", [DoctorController::class, "store"]);
+    Route::put("patient/{patient}", [DoctorController::class, "update"]);
+    Route::delete("patient/{patient}", [DoctorController::class, "destroy"]);
+});

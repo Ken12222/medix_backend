@@ -18,7 +18,7 @@ class PatientResource extends JsonResource
             "patient_id"=>$this->user_id,
             "doctor_id"=>$this->doctor_id,
             "Patient_Details"=>new UserResource($this->whenLoaded("user")),
-            "Patient_Report"=>new PatientReportResource($this->whenLoaded("PatientReport"))
+            "Patient_Report"=>PatientReportResource::collection($this->whenLoaded("PatientReport"))
         ];
     }
 }
