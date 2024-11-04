@@ -20,11 +20,7 @@ class Patient extends Model
     }
 
     public function Doctor(){
-        return $this->belongsTo(Doctor::class);
-    }
-
-    public function Doctor_Patient(){
-        return $this->hasMany(Doctor_patient::class);
+        return $this->belongsToMany(Doctor::class, "doctor_patients");
     }
 
     public function PatientReport(){

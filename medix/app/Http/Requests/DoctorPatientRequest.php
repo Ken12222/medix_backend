@@ -22,7 +22,8 @@ class DoctorPatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            "doctor_id"=>"required|int",
+            "status"=>"string|required"
         ];
     }
 }
