@@ -7,10 +7,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\AuthRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\VerifyEmailRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -21,29 +23,50 @@ class AuthController extends Controller
     public function login(AuthRequest $request){
         $loginData = $request->validated();
 
-        $user = User::where("email", $loginData["email"])->first();
+        if (Auth::attempt($loginData)) {
 
-        if(!$user){
-            throw ValidationException::withMessages([
-                "error"=> ["the provided credentials are incorrect"]
-            ]);
-        }
-
-        $passwordVerify = Hash::check($loginData["password"], $user->password);
-
-        if(!$passwordVerify){
-            throw ValidationException::withMessages([
-                "error"=> ["the provided credentials are incorrect"]
-            ]);
-        }
-        $token = $user->createToken("api-Token")->plainTextToken;
-        return response()->json([
-            "token"=>$token,
+            return response()->json([
+            "message"=>"login success",
         ]);
+        }
+
+        return response()->json([
+            "message"=>"login failed"
+        ]);
+
+
+        // $user = User::where("email", $loginData["email"])->first();
+
+        // if(!$user){
+        //     throw ValidationException::withMessages([
+        //         "error"=> ["the provided credentials are incorrect"]
+        //     ]);
+        // }
+
+        // $passwordVerify = Hash::check($loginData["password"], $user->password);
+
+        // if(!$passwordVerify){
+        //     throw ValidationException::withMessages([
+        //         "error"=> ["the provided credentials are incorrect"]
+        //     ]);
+        // }
+        // $token = $user->createToken("api-Token")->plainTextToken;
+        // return response()->json([
+        //     "token"=>$token,
+        //     "user"=>$user
+        // ]);
     }
 
-    public function logout(){
-        request()->user()->tokens()->delete();
+    public function logout(Request $request){
+
+        $logout = Auth::guard('web')->logout();
+
+        // Clear session data
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Remove the CSRF token cookie
+        Cookie::queue(Cookie::forget('XSRF-TOKEN'));
 
         return response()->json([
             "message"=>"logout successful"

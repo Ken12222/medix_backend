@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DoctorPatientRequest;
-use App\Http\Resources\DoctorPatientResource;
 use App\Models\Doctor;
 use App\Models\DoctorPatient;
 use App\Models\Patient;
@@ -34,7 +33,6 @@ class DoctorPatientController extends Controller
 
         $addDocRequest = $request->validated();
         $addDocRequest["patient_id"] = $patient->id;
-        $addDocRequest["status"] = "pending";
 
         if($doctor === null || $patient === null){
             return response()->json([
@@ -120,7 +118,7 @@ class DoctorPatientController extends Controller
             return response()->json([
                 "message"=>"only doctors can approve requests",
                 "status"=>"failed"
-            ]);
+            ], 422);
             exit;
         }
 
@@ -128,6 +126,13 @@ class DoctorPatientController extends Controller
             ["doctor_id", $doctorID],
             ["patient_id", $patientID]
         ])->first();
+
+        if($doctorPatient->status === "approved"){
+            return response()->json([
+                "message"=>"User is already added to your profile",
+                "status"=>"failed"
+            ], 422);
+        }
 
         $doctorPatient->status = $requestApproval["status"];
         $approvedRequest = $doctorPatient->save();

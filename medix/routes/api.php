@@ -6,7 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\DoctorPatientController;
 use App\Http\Controllers\Api\PatientController;
-use App\Http\Controllers\Api\PatientReportController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\AppointmentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -56,12 +57,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete("patient/{patient}", [PatientController::class, "destroy"]) ;
 });
 
-//Patient Report
+//Report
 Route::middleware(["auth:sanctum"])->group(function(){
-    Route::get("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "index"])->scopeBindings();
-    Route::get("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "show"])->scopeBindings();
-    Route::post("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "update"])->scopeBindings();
-    Route::delete("doctor/{doctor}/patient/{patient}/patient_report/{patient_report}", [PatientReportController::class, "destroy"])->scopeBindings();
-    Route::post("doctor/{doctor}/patient/{patient}/patient_report", [PatientReportController::class, "store"])->scopeBindings();
+    Route::get("doctor/{doctor}/patient/{patient}/report", [ReportController::class, "index"])->scopeBindings();
+    Route::get("doctor/{doctor}/patient/{patient}/report/{report}", [ReportController::class, "show"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient/{patient}/report/{report}", [ReportController::class, "update"])->scopeBindings();
+    Route::delete("doctor/{doctor}/patient/{patient}/report/{report}", [ReportController::class, "destroy"])->scopeBindings();
+    Route::post("doctor/{doctor}/patient/{patient}/report", [ReportController::class, "store"])->scopeBindings();
 });
 
+//appointment
+Route::middleware(["auth:sanctum"])->group(function(){
+Route::get("doctor/{doctor}/appointment", [AppointmentController::class, "index"]);
+Route::get("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "show"]);
+Route::put("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "update"]);
+Route::post("doctor/{doctor}/appointment", [AppointmentController::class, "store"]);
+Route::delete("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "destroy"]) ;
+});

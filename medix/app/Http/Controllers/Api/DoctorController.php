@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Http\Requests\DoctorRequest;
 use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
-use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use App\Custom\Services\AccountVerificationServices;
 

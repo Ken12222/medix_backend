@@ -8,7 +8,6 @@ use App\Http\Requests\PatientRequest;
 use App\Http\Resources\PatientResource;
 use Illuminate\Http\Request;
 use App\Models\Patient;
-use App\Models\Doctor;
 use Illuminate\Support\Facades\Gate;
 
 class PatientController extends Controller
