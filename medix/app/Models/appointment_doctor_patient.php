@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class appointment_doctor_patient extends Model
+class Appointment_Doctor_Patient extends Model
 {
     use HasFactory;
 
@@ -15,7 +15,9 @@ class appointment_doctor_patient extends Model
         "appointment_id"
     ];
 
-    public function appointment(){
-        return $this->hasManyThrough(Appointment::class, appointment_doctor_patient::class);
-    }
+    // public function Appointments(){
+    //     return $this->hasManyThrough(Appointment::class, Appointment_Doctor_Patient::class,
+    //     ""
+    //     )
+    // }
 }

@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "postinstall": "curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer && composer install && php artisan migrate --force"
     },
     "devDependencies": {
         "axios": "^1.7.4",

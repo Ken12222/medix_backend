@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AppointmentDoctorPatientRequest;
 use App\Http\Requests\AppointmentRequest;
+use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
-use App\Models\appointment_doctor_patient;
 use App\Models\Doctor;
+use App\Models\DoctorPatient;
+use App\Models\Patient;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
@@ -19,7 +20,19 @@ class AppointmentController extends Controller
      */
     public function index(Doctor $doctor)
     {
-        return $doctor->appointment;
+        //$authUserID = request()->user()->id;
+        //$appointmentID =  appointment_doctor_patient::where("patient_id", $authUserID)->orWhere("doctor_id", $authUserID)->get();
+        if(Auth::user()->role === "doctor"){
+
+            return AppointmentResource::collection(
+                Appointment::with("patient.user")->where("doctor_id", request()->user()->doctor->id)->get()
+            ) ;
+        }else{
+            return AppointmentResource::collection(
+               Appointment::with("doctor")->where("patient_id", request()->user()->patient->id)->get()
+            );
+        }
+        
     }
 
     /**
@@ -33,42 +46,39 @@ class AppointmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AppointmentRequest $request, AppointmentDoctorPatientRequest $appointRequest)
+    public function store(AppointmentRequest $request)
     {
         $appointmentData = $request->validated();
 
-        $appointmentDoctorPatient = $appointRequest->validated();
-
-        $newAppointment = DB::beginTransaction();
-            
-        try{
-            $saveAppointment = Appointment::create($appointmentData);
-            $appointmentDoctorPatient["appointment_id"] = $saveAppointment->id;
-
-            $saveappointmentDoctorPatient = appointment_doctor_patient::create($appointmentDoctorPatient);
-            DB::commit();
-            return response()->json([
-                "message"=>"Appointment created successfully",
-                "status"=>"success"
-            ], 200);
-
-        }catch(Exception $e){
-
-            return $e;
-            DB::rollBack();
-            return response()->json([
-                "error"=>"Failed create appointment",
-                "status"=>"faileds"
-            ], 422);
+        //check if doctor is already added to pstient profile be kooing appointment
+        $isDoctorOnMyProfile= DoctorPatient::where("doctor_id", $appointmentData["doctor_id"])
+        ->where("status", "approved")->first();
+        if($isDoctorOnMyProfile){ 
+            Appointment::create($appointmentData);
+        }else{
+            return response()->json(["message"=>"add doctor to your profile to book appointment"], 500);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Doctor $doctor, Appointment $appointment)
+    public function show(Doctor $doctor, Patient $patient, Appointment $appointment)
     {
-        return $appointment;
+
+        if(Auth::user()->role === "patient"){
+
+            return AppointmentResource::collection(
+                $appointment->with("doctor.user")->where("id", $appointment->id)->get()
+            );
+
+        }
+        if(Auth::user()->role ===  "doctor"){
+            return AppointmentResource::collection(
+                Auth::user()->doctor->appointment
+            );
+        }
+        
     }
 
     /**

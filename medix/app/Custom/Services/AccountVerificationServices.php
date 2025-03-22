@@ -49,7 +49,7 @@ Class AccountVerificationServices{
                 "status"=>"failed"
             ], 403);
         }else{
-            $patient = User::where("id", $patientDataExist->user_id)->first();
+            $patient = User::where("id", $patientDataExist->user_id)->with("patient")->first();
             if(!$patientDataExist){
                 return response()->json([
                     "message"=>"Account not found",
@@ -65,6 +65,7 @@ Class AccountVerificationServices{
                 $patient->save();
                 
                 return response()->json([
+                    "user"=>$patient,
                     "message"=>"KYC completed successfully",
                     "status"=>"success"
                 ], 200); 

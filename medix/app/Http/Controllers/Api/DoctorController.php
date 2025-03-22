@@ -9,6 +9,8 @@ use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Gate;
 use App\Custom\Services\AccountVerificationServices;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 
 class DoctorController extends Controller
 {
@@ -19,16 +21,42 @@ class DoctorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return DoctorResource::collection(
-            Doctor::with("user")
-                ->whereHas("user", function($query){
-                $query->where("role", "doctor");
-            })
+        $searchParam = $request->query("query");
+        $query = User::query();
+
+        
+        
+        if($searchParam != null){
+            return UserResource::collection(
+                $query->when($searchParam, fn($q)=>$q->name($searchParam)));
+            // User::when($name, fn($query, $name)=>
+            // $query->name($name)->get()  
+            // ));
+        }
+        else{
+            return UserResource::collection(
+            // Doctor::with("user")
+            // ->whereHas("user", function($query){
+            // $query->where("role", "doctor");
+            // })
+            // ->paginate()
+            User::with("Doctor")
+            ->where("role", "doctor")
             ->paginate()
-        );
+            );
+        }
     }
+
+    // protected function searchDoctor(string $queryParam){
+    //     $searchQuery = request()->query("query");
+
+    //     if(!$searchQuery){
+    //         return false;
+    //     }
+
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -71,7 +99,7 @@ class DoctorController extends Controller
     {
         Gate::authorize("view", $doctor);
         return new DoctorResource (
-            $doctor::with("user")->first()
+            $doctor::with("user")->where("id", $doctor->id)->first()
         );
     }
 

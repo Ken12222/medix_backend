@@ -9,6 +9,7 @@ use App\Http\Resources\PatientResource;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 class PatientController extends Controller
 {
@@ -89,14 +90,17 @@ class PatientController extends Controller
             $updateData = $patient->update($patientDetails);
             if(!$updateData){
                 return response()->json([
+                    
                     "message"=>"failed to update Profile data",
                     "status"=>"failed"
                 ], 422); 
             }else{
+
                 return response()->json([
+                    "patient"=>User::where("id", request()->user()->id)->with("patient")->first(),
                     "message"=>"Profile updated successfully",
                     "status"=>"success"
-                ], 422); 
+                ], 200); 
             }
         }else{
             return response()->json([

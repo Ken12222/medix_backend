@@ -23,7 +23,6 @@ class DoctorPatientRequest extends FormRequest
     {
         return [
             "doctor_id"=>"required|int",
-            "status"=>"string|required"
         ];
     }
 }

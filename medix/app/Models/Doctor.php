@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Doctor extends Model
 {
@@ -13,6 +15,10 @@ class Doctor extends Model
 
     public function User(){
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeName(Builder $query, string $name){
+        return $query->where("name", "LIKE", "%".$name."%")->with("doctor")->get();
     }
 
     // public function Patient(){
@@ -34,29 +40,26 @@ class Doctor extends Model
 
     public function reports()
     {
-        return $this->hasManyThrough(
-            Report::class,
-            DoctorPatientReport::class,
-            'doctor_id', // Foreign key on doctor_patient_report table
-            'id',        // Foreign key on reports table
-            'id',        // Local key on doctors table
-            'report_id'  // Local key on doctor_patient_report table
-        );
+        // return $this->hasManyThrough(
+        //     Report::class,
+        //     DoctorPatientReport::class,
+        //     'doctor_id', // Foreign key on doctor_patient_report table
+        //     'id',        // Foreign key on reports table
+        //     'id',        // Local key on doctors table
+        //     'report_id'  // Local key on doctor_patient_report table
+        // );
+        return $this->hasMany(Report::class);
     }
 
     public function appointment(){
-        return $this->hasManyThrough(Appointment::class, appointment_doctor_patient::class,
-        'doctor_id', // Foreign key on appointment_doctor_patient table
-        'id',        // Foreign key on reports table
-        'id',        // Local key on doctors table
-        'appointment_id'  // Local key on appointment_doctor_patient table
+        return $this->hasMany(Appointment::class
     );
     }
 
-    public function patient()
-    {
-        return $this->belongsToMany(Patient::class, 'appointment_doctor_patients', 'doctor_id', 'patient_id')
-                    ->withPivot('appointment_id') // Include the report_id field from the pivot table
-                    ->withTimestamps(); // Include timestamps if present
-    }
+    // public function patient()
+    // {
+    //     return $this->belongsToMany(Patient::class, 'appointment_doctor_patients', 'doctor_id', 'patient_id')
+    //                 ->withPivot('appointment_id') // Include the report_id field from the pivot table
+    //                 ->withTimestamps(); // Include timestamps if present
+    // }
 }

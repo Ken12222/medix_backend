@@ -19,15 +19,17 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($doctorID, $patientID, Report $report)
+    public function index($doctorID, $patient, Report $report)
     {   
-        $reports = DoctorPatientReport::where("doctor_id", $doctorID)
-        ->where("patient_id", $patientID)->with("reports")->paginate();
+        $reports = Report::where("doctor_id", $doctorID)
+        ->Orwhere("patient_id", $patient)->paginate();
 
-        Gate::authorize("ViewAny", $report);
-        return response()->json([
-            "data"=>$reports
-        ]);
+        // ->Orwhere("patient_id", $patient)->with("reports")->paginate();
+return $reports;
+        // Gate::authorize("ViewAny", $report);
+        // return response()->json([
+        //     "report"=>$report
+        // ]);
     }
 
 

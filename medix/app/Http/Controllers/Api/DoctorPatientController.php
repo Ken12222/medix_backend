@@ -16,12 +16,21 @@ class DoctorPatientController extends Controller
      */
     public function index(Doctor $doctor, Patient $patient)
     {
+        
         if(request()->user()->role === "patient"){
             return DoctorPatient::where("patient_id", $patient->id)
             ->where("status", "approved")->with("doctor.user")->paginate();
         }else if(request()->user()->role === "doctor"){
-            return DoctorPatient::where("doctor_id", $doctor->id)
-            ->where("status", "approved")->with("patient.user")->paginate();
+            $newRequests = DoctorPatient::where("doctor_id", $doctor->id)
+            ->where("status", "pending")->with("patient.user")->paginate();
+
+            if(is_null($newRequests)){
+                return response()->json([
+                    "message"=>"there are no requests at the moment"
+                ], 404);
+            }else{
+                return $newRequests;
+            }
         }
     }
 
@@ -32,19 +41,20 @@ class DoctorPatientController extends Controller
     {
 
         $addDocRequest = $request->validated();
-        $addDocRequest["patient_id"] = $patient->id;
+        $addDocRequest["patient_id"] = request()->user()->patient->id;
+
 
         if($doctor === null || $patient === null){
             return response()->json([
                 "message"=>"verify your account to Proceed.",
                 "status"=>"failed"
-            ], 422);
+            ], 500);
             exit;
-        }elseif($patient->user_id !== request()->user()->id){
+        }elseif(!request()->user()){
             return response()->json([
                 "message"=>"Your not authorize to access this route",
                 "status"=>"failed"
-            ], 422);
+            ], 500);
             exit;
         }
 
@@ -54,7 +64,7 @@ class DoctorPatientController extends Controller
             return response()->json([
                 "message"=>"User is already added to your profile",
                 "status"=>"failed"
-            ], 422);
+            ], 500);
             exit;
         }
 

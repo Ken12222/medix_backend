@@ -8,8 +8,9 @@ use App\Http\Controllers\Api\DoctorPatientController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\UserController;
 
-Route::get('/user', function (Request $request) {
+Route::get('/user', [UserController::class, "index"], function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
@@ -36,7 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get("doctor/{doctor}/patient", [DoctorPatientController::class, "index"])->scopeBindings();
     Route::get("doctor/{doctor}/patient/{patient}", [DoctorPatientController::class, "show"])->scopeBindings();
     Route::post("doctor/{doctor}/patient", [DoctorPatientController::class, "store"])->scopeBindings();
-    Route::post("doctor/{doctor}/patient/{patient}", [DoctorPatientController::class, "update"])->scopeBindings();
+    Route::put("doctor/{doctor}/patient/{patient}", [DoctorPatientController::class, "update"])->scopeBindings();
     Route::delete("doctor/{doctor}/patient/{patient}", [DoctorPatientController::class, "destroy"])->scopeBindings() ;
 });
 
@@ -57,7 +58,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete("patient/{patient}", [PatientController::class, "destroy"]) ;
 });
 
-//Report
+//Report =
 Route::middleware(["auth:sanctum"])->group(function(){
     Route::get("doctor/{doctor}/patient/{patient}/report", [ReportController::class, "index"])->scopeBindings();
     Route::get("doctor/{doctor}/patient/{patient}/report/{report}", [ReportController::class, "show"])->scopeBindings();
@@ -66,7 +67,7 @@ Route::middleware(["auth:sanctum"])->group(function(){
     Route::post("doctor/{doctor}/patient/{patient}/report", [ReportController::class, "store"])->scopeBindings();
 });
 
-//appointment
+//Doctor appointment =
 Route::middleware(["auth:sanctum"])->group(function(){
 Route::get("doctor/{doctor}/appointment", [AppointmentController::class, "index"]);
 Route::get("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "show"]);
@@ -74,3 +75,20 @@ Route::put("doctor/{doctor}/appointment/{appointment}", [AppointmentController::
 Route::post("doctor/{doctor}/appointment", [AppointmentController::class, "store"]);
 Route::delete("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "destroy"]) ;
 });
+
+
+//patient AppointmentBooking
+Route::middleware(["auth:sanctum"])->group(function(){
+    Route::get("patient/{patient}/appointment", [AppointmentController::class, "index"]);
+    Route::get("patient/{patient}/appointment/{appointment}", [AppointmentController::class, "show"]);
+    Route::put("patient/{patient}/appointment/{appointment}", [AppointmentController::class, "update"]);
+    Route::post("patient/{patient}/appointment", [AppointmentController::class, "store"]);
+    Route::delete("patient/{patient}/appointment/{appointment}", [AppointmentController::class, "destroy"]) ;
+    });
+
+
+    //search doctor 
+    
+    // Route::get("/user/search?query=".$name, [DoctorController::class, "index"], function(Request $request){
+    //     $name = $request->input("name");
+    // });

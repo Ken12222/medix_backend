@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("doctor_id")->references("id")->on("doctors")->onDelete("cascade");
+            $table->foreignId("patient_id")->references("id")->on("patients")->onDelete("cascade");
             $table->date("appointment_date");
             $table->time("appointment_time");
             $table->string("reason");

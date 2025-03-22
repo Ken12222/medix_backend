@@ -24,7 +24,9 @@ class AppointmentRequest extends FormRequest
         return [
             "appointment_date"=>"required|date"
             ,"appointment_time"=>"required|date_format:H:i:s"
-            ,"reason"=>"string|required|max:255"
+            ,"reason"=>"string|required|max:255",
+            "doctor_id"=>"integer|required",
+            "patient_id"=>"integer|required",
         ];
     }
 }

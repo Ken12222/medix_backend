@@ -22,8 +22,7 @@ class AppointmentDoctorPatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "doctor_id"=>"integer|required",
-            "patient_id"=>"integer|required",
+
         ];
     }
 }
