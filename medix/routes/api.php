@@ -75,6 +75,9 @@ Route::put("doctor/{doctor}/appointment/{appointment}", [AppointmentController::
 Route::post("doctor/{doctor}/appointment", [AppointmentController::class, "store"]);
 Route::delete("doctor/{doctor}/appointment/{appointment}", [AppointmentController::class, "destroy"]) ;
 });
+Route::get('/test', function () {
+    return response()->json(['message' => 'API working']);
+});
 
 
 //patient AppointmentBooking
