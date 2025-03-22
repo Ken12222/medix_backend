@@ -17,9 +17,9 @@ return [
 
     'paths' => ['*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => [env("FRONTEND_URL", "http://localhost:5173")],
+    'allowed_methods' => ["*"],//env("FRONTEND_URL", "https://medix-frontend.vercel.app/")
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://medix-frontend.vercel.app/'],
 
     'allowed_origins_patterns' => ["*"],
 
